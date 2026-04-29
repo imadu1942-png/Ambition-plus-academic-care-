@@ -5,7 +5,7 @@ import { isToday, isThisWeek, isThisMonth, parseISO } from 'date-fns';
 
 interface StudentDashboardProps {
   data: AppData;
-  user: User;
+  user: User | null;
 }
 
 type TimeFrame = 'all' | 'daily' | 'weekly' | 'monthly';
@@ -14,6 +14,7 @@ export default function StudentDashboard({ data, user }: StudentDashboardProps) 
   const [activeSubject, setActiveSubject] = useState<string>('Overall');
   const [activeGroup, setActiveGroup] = useState<string>('All Groups');
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('all');
+  const [searchRoll, setSearchRoll] = useState<string>('');
 
   const rankings = useMemo(() => {
     // 1. Filter marks by time frame
@@ -59,25 +60,53 @@ export default function StudentDashboard({ data, user }: StudentDashboardProps) 
     });
   }, [data, activeSubject, activeGroup, timeFrame]);
 
-  const currentUserData = rankings.find(r => r.id === user.studentId);
+  const highlightId = useMemo(() => {
+    if (user?.studentId) return user.studentId;
+    if (searchRoll) {
+      const found = data.students.find(s => s.rollNumber === searchRoll);
+      return found?.id || null;
+    }
+    return null;
+  }, [user, searchRoll, data.students]);
+
+  const currentUserData = rankings.find(r => r.id === highlightId);
 
   return (
     <div className="space-y-6">
       {/* Header Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Your Result Card */}
-        <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl text-white shadow-lg space-y-2">
-          <p className="text-blue-100 text-sm font-medium uppercase tracking-wider">Your Position</p>
-          <div className="flex justify-between items-end">
-            <div>
-              <p className="text-4xl font-black">#{currentUserData?.rank || '-'}</p>
-              <p className="text-blue-100 text-xs mt-1">out of {rankings.length} students</p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold">{currentUserData?.total || 0}</p>
-              <p className="text-blue-100 text-xs mt-1">Total Marks</p>
+        {/* Search / Result Card */}
+        <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl text-white shadow-lg flex flex-col justify-between">
+          <div>
+            <p className="text-blue-100 text-sm font-medium uppercase tracking-wider mb-3">
+              {currentUserData ? 'Personal Result' : 'Find Your Result'}
+            </p>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Enter Roll Number"
+                value={searchRoll}
+                onChange={(e) => setSearchRoll(e.target.value)}
+                className="w-full bg-white/20 border border-white/20 rounded-lg px-3 py-2 text-white placeholder:text-blue-200 outline-none focus:bg-white/30 transition-all text-sm mb-4"
+              />
+              <Hash className="absolute right-3 top-2.5 w-4 h-4 text-blue-200" />
             </div>
           </div>
+          
+          {currentUserData ? (
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-4xl font-black">#{currentUserData.rank}</p>
+                <p className="text-blue-100 text-xs mt-1">{currentUserData.name}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold">{currentUserData.total}</p>
+                <p className="text-blue-100 text-xs mt-1">Total Marks</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-blue-200 text-xs italic">Enter roll number to see your rank and total marks.</p>
+          )}
         </div>
 
         {/* Global Filters */}
@@ -172,14 +201,14 @@ export default function StudentDashboard({ data, user }: StudentDashboardProps) 
             <tbody className="divide-y divide-slate-100">
               {rankings.map((student, index) => {
                 const isTop3 = student.rank <= 3 && student.total > 0;
-                const isMe = student.id === user.studentId;
+                const isMe = student.id === highlightId;
 
                 return (
                   <tr 
                     key={student.id} 
                     className={`transition-all ${
                       isTop3 ? 'bg-amber-50/30' : ''
-                    } ${isMe ? 'bg-blue-50/50 ring-2 ring-blue-100 ring-inset' : 'hover:bg-slate-50'}`}
+                    } ${isMe ? 'bg-blue-50 ring-2 ring-blue-200 ring-inset scale-[1.02] shadow-sm z-[1]' : 'hover:bg-slate-50'}`}
                   >
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">

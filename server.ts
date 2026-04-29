@@ -23,10 +23,7 @@ const loadData = () => {
     students: [],
     marks: [],
     subjects: ["Math", "English", "General Science"],
-    groups: ["Science", "Commerce", "Arts"],
-    users: [
-      { id: "u1", username: "Admin", password: "29306", role: "admin" },
-    ]
+    groups: ["Science", "Commerce", "Arts"]
   };
 };
 
@@ -45,39 +42,6 @@ async function startServer() {
 
   let data = loadData();
 
-  // API Routes
-  app.post("/api/login", (req, res) => {
-    const { username, password } = req.body;
-    
-    if (!username || !password) {
-      return res.status(400).json({ success: false, message: "Username and password are required" });
-    }
-
-    // Case-insensitive check for Admin, others are exact (Roll Number)
-    const user = data.users.find((u: any) => {
-      const u1 = u.username || "";
-      const u2 = username.toString();
-      const unameMatch = u.role === 'admin' 
-        ? u1.toLowerCase() === u2.toLowerCase() 
-        : u1 === u2;
-      return unameMatch && (u.password || "").toString() === password.toString();
-    });
-
-    if (user) {
-      res.json({ 
-        success: true, 
-        user: { 
-          id: user.id, 
-          username: user.username, 
-          role: user.role, 
-          studentId: user.studentId 
-        } 
-      });
-    } else {
-      res.status(401).json({ success: false, message: "Invalid Credentials. Use Admin/29306 or RollNo/12345" });
-    }
-  });
-
   // Socket.io for real-time
   io.on("connection", (socket) => {
     socket.emit("initial_data", data);
@@ -85,13 +49,6 @@ async function startServer() {
     socket.on("add_student", (student) => {
       const newStudent = { ...student, id: Math.random().toString(36).substr(2, 9) };
       data.students.push(newStudent);
-      data.users.push({
-        id: "u" + Math.random().toString(36).substr(2, 9),
-        username: newStudent.rollNumber,
-        password: "12345",
-        role: "student",
-        studentId: newStudent.id
-      });
       saveData(data);
       io.emit("data_updated", data);
     });
@@ -108,7 +65,6 @@ async function startServer() {
     socket.on("delete_student", (studentId) => {
       data.students = data.students.filter((s: any) => s.id !== studentId);
       data.marks = data.marks.filter((m: any) => m.studentId !== studentId);
-      data.users = data.users.filter((u: any) => u.studentId !== studentId);
       saveData(data);
       io.emit("data_updated", data);
     });
