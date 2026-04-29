@@ -49,12 +49,18 @@ async function startServer() {
   app.post("/api/login", (req, res) => {
     const { username, password } = req.body;
     
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: "Username and password are required" });
+    }
+
     // Case-insensitive check for Admin, others are exact (Roll Number)
     const user = data.users.find((u: any) => {
+      const u1 = u.username || "";
+      const u2 = username.toString();
       const unameMatch = u.role === 'admin' 
-        ? u.username.toLowerCase() === username.toString().toLowerCase() 
-        : u.username === username.toString();
-      return unameMatch && u.password === password.toString();
+        ? u1.toLowerCase() === u2.toLowerCase() 
+        : u1 === u2;
+      return unameMatch && (u.password || "").toString() === password.toString();
     });
 
     if (user) {
