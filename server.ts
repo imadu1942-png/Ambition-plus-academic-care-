@@ -48,11 +48,27 @@ async function startServer() {
   // API Routes
   app.post("/api/login", (req, res) => {
     const { username, password } = req.body;
-    const user = data.users.find((u: any) => u.username === username && u.password === password);
+    
+    // Case-insensitive check for Admin, others are exact (Roll Number)
+    const user = data.users.find((u: any) => {
+      const unameMatch = u.role === 'admin' 
+        ? u.username.toLowerCase() === username.toString().toLowerCase() 
+        : u.username === username.toString();
+      return unameMatch && u.password === password.toString();
+    });
+
     if (user) {
-      res.json({ success: true, user: { id: user.id, username: user.username, role: user.role, studentId: user.studentId } });
+      res.json({ 
+        success: true, 
+        user: { 
+          id: user.id, 
+          username: user.username, 
+          role: user.role, 
+          studentId: user.studentId 
+        } 
+      });
     } else {
-      res.status(401).json({ success: false, message: "Invalid credentials" });
+      res.status(401).json({ success: false, message: "Invalid Credentials. Use Admin/29306 or RollNo/12345" });
     }
   });
 
