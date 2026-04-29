@@ -1,13 +1,36 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ambition Plus Dashboard</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Simple Login</title>
+</head>
+<body>
 
+  <h2>Login System</h2>
+
+  <input type="text" id="username" placeholder="Enter Username"><br><br>
+  <input type="password" id="password" placeholder="Enter Password"><br><br>
+
+  <button onclick="login()">Login</button>
+
+  <script>
+    // Admin login
+    const savedUser = {
+      username: "admin",
+      password: "29306"
+    };
+
+    function login() {
+      const user = document.getElementById("username").value;
+      const pass = document.getElementById("password").value;
+
+      if (user === savedUser.username && pass === savedUser.password) {
+        localStorage.setItem("loggedIn", "true");
+        alert("Login Successful ✅");
+      } else {
+        alert("Wrong username or password ❌");
+      }
+    }
+  </script>
+
+</body>
+</html>
