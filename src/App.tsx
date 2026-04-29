@@ -1,10 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
-import { io, Socket } from 'socket.io-client';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { AppData } from './types';
 import Splash from './components/Splash';
 import AdminDashboard from './components/AdminDashboard';
 import StudentDashboard from './components/StudentDashboard';
+import { subscribeToData } from './lib/dataService';
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -39,23 +39,13 @@ export default function App() {
     subjects: [],
     groups: []
   });
-  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const newSocket = io();
-    setSocket(newSocket);
-
-    newSocket.on('initial_data', (initialData: AppData) => {
-      setData(initialData);
+    const unsubscribe = subscribeToData((newData) => {
+      setData(newData);
     });
 
-    newSocket.on('data_updated', (updatedData: AppData) => {
-      setData(updatedData);
-    });
-
-    return () => {
-      newSocket.close();
-    };
+    return () => unsubscribe();
   }, []);
 
   if (showSplash) {
@@ -94,7 +84,7 @@ export default function App() {
 
           <main className="max-w-7xl mx-auto p-4">
             {isAdminMode ? (
-              <AdminDashboard data={data} socket={socket} />
+              <AdminDashboard data={data} />
             ) : (
               <StudentDashboard data={data} user={null} />
             )}

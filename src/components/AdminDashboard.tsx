@@ -1,14 +1,13 @@
 import { useState } from 'react';
-import { Socket } from 'socket.io-client';
-import { AppData, Student, Mark } from '../types';
+import { AppData, Student } from '../types';
 import { UserPlus, PlusCircle, Users, BookOpen, Edit2, Save, X, Settings, Trash2 } from 'lucide-react';
+import * as dataService from '../lib/dataService';
 
 interface AdminDashboardProps {
   data: AppData;
-  socket: Socket | null;
 }
 
-export default function AdminDashboard({ data, socket }: AdminDashboardProps) {
+export default function AdminDashboard({ data }: AdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<'students' | 'marks' | 'settings'>('marks');
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [newSubject, setNewSubject] = useState('');
@@ -18,79 +17,67 @@ export default function AdminDashboard({ data, socket }: AdminDashboardProps) {
   const [newStudent, setNewStudent] = useState({ name: '', rollNumber: '', group: '' });
   const [newMark, setNewMark] = useState({ studentId: '', subject: '', score: '' });
 
-  const handleAddStudent = (e: React.FormEvent) => {
+  const handleAddStudent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (socket) {
-      socket.emit('add_student', newStudent);
-      setNewStudent({ name: '', rollNumber: '', group: '' });
-    }
+    await dataService.addStudent(newStudent);
+    setNewStudent({ name: '', rollNumber: '', group: '' });
   };
 
-  const handleUpdateStudent = (e: React.FormEvent) => {
+  const handleUpdateStudent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (socket && editingStudent) {
-      socket.emit('update_student', editingStudent);
+    if (editingStudent) {
+      await dataService.updateStudent(editingStudent);
       setEditingStudent(null);
     }
   };
 
-  const handleAddMark = (e: React.FormEvent) => {
+  const handleAddMark = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (socket) {
-      socket.emit('add_mark', {
-        studentId: newMark.studentId,
-        subject: newMark.subject,
-        score: parseFloat(newMark.score),
-      });
-      setNewMark({ studentId: '', subject: '', score: '' });
-    }
+    await dataService.addMark({
+      studentId: newMark.studentId,
+      subject: newMark.subject,
+      score: parseFloat(newMark.score),
+    });
+    setNewMark({ studentId: '', subject: '', score: '' });
   };
   
-  const handleAddSubject = (e: React.FormEvent) => {
+  const handleAddSubject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (socket && newSubject) {
-      socket.emit('add_subject', newSubject);
+    if (newSubject) {
+      await dataService.addSubject(newSubject);
       setNewSubject('');
     }
   };
 
-  const handleAddGroup = (e: React.FormEvent) => {
+  const handleAddGroup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (socket && newGroup) {
-      socket.emit('add_group', newGroup);
+    if (newGroup) {
+      await dataService.addGroup(newGroup);
       setNewGroup('');
     }
   };
 
-  const handleDeleteStudent = (studentId: string) => {
-    if (socket) {
-      if (confirm('Are you sure you want to delete this student and all their marks?')) {
-        socket.emit('delete_student', studentId);
-      }
+  const handleDeleteStudent = async (studentId: string) => {
+    if (confirm('Are you sure you want to delete this student and all their marks?')) {
+      await dataService.deleteStudent(studentId);
     }
   };
 
-  const handleDeleteMark = (markId: string) => {
-    if (socket) {
-      if (confirm('Delete this mark entry?')) {
-        socket.emit('delete_mark', markId);
-      }
+  const handleDeleteMark = async (markId: string) => {
+    if (confirm('Delete this mark entry?')) {
+      await dataService.deleteMark(markId);
     }
   };
 
-  const handleDeleteSubject = (subject: string) => {
-    if (socket) {
-      if (confirm(`Delete subject "${subject}"?`)) {
-        socket.emit('delete_subject', subject);
-      }
+  const handleDeleteSubject = async (subject: string) => {
+    if (confirm(`Delete subject "${subject}"?`)) {
+      await dataService.deleteSubject(subject);
     }
   };
 
-  const handleDeleteGroup = (group: string) => {
-    if (socket) {
-      if (confirm(`Delete group "${group}"?`)) {
-        socket.emit('delete_group', group);
-      }
+  const handleDeleteGroup = async (group: string) => {
+    if (confirm(`Delete group "${group}"?`)) {
+      await dataService.deleteGroup(group);
     }
   };
 

@@ -1,0 +1,58 @@
+{
+  "entities": {
+    "Student": {
+      "title": "Student",
+      "description": "Represents a student record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "rollNumber": { "type": "string" },
+        "group": { "type": "string" }
+      },
+      "required": ["name", "rollNumber", "group"]
+    },
+    "Mark": {
+      "title": "Mark",
+      "description": "Represents a mark recorded for a student in a subject",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "studentId": { "type": "string" },
+        "subject": { "type": "string" },
+        "marks": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["studentId", "subject", "marks", "timestamp"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Global application settings like subjects and groups",
+      "type": "object",
+      "properties": {
+        "subjects": { 
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "groups": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/students/{studentId}": {
+      "schema": "Student",
+      "description": "Collection of students"
+    },
+    "/marks/{markId}": {
+      "schema": "Mark",
+      "description": "Collection of marks"
+    },
+    "/settings/global": {
+      "schema": "Settings",
+      "description": "Global subjects and groups"
+    }
+  }
+}

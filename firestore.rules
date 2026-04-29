@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    
+    function incoming() { return request.resource.data; }
+    
+    // Students collection
+    match /students/{studentId} {
+      allow read: if true;
+      allow create, update: if 
+        incoming().name is string && incoming().name.size() > 0 && incoming().name.size() <= 100 &&
+        incoming().rollNumber is string && incoming().rollNumber.size() > 0 && incoming().rollNumber.size() <= 50 &&
+        incoming().group is string;
+      allow delete: if true; 
+    }
+
+    // Marks collection
+    match /marks/{markId} {
+      allow read: if true;
+      allow create, update: if 
+        incoming().studentId is string &&
+        incoming().subject is string &&
+        incoming().marks is number &&
+        incoming().timestamp is string;
+      allow delete: if true;
+    }
+
+    // Settings
+    match /settings/global {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
