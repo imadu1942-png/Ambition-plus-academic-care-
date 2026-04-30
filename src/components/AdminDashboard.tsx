@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { AppData, Student } from '../types';
 import { UserPlus, PlusCircle, Users, BookOpen, Edit2, Save, X, Settings, Trash2 } from 'lucide-react';
 import * as dataService from '../lib/dataService';
@@ -17,13 +17,13 @@ export default function AdminDashboard({ data }: AdminDashboardProps) {
   const [newStudent, setNewStudent] = useState({ name: '', rollNumber: '', group: '' });
   const [newMark, setNewMark] = useState({ studentId: '', subject: '', score: '' });
 
-  const handleAddStudent = async (e: React.FormEvent) => {
+  const handleAddStudent = async (e: FormEvent) => {
     e.preventDefault();
     await dataService.addStudent(newStudent);
     setNewStudent({ name: '', rollNumber: '', group: '' });
   };
 
-  const handleUpdateStudent = async (e: React.FormEvent) => {
+  const handleUpdateStudent = async (e: FormEvent) => {
     e.preventDefault();
     if (editingStudent) {
       await dataService.updateStudent(editingStudent);
@@ -31,7 +31,7 @@ export default function AdminDashboard({ data }: AdminDashboardProps) {
     }
   };
 
-  const handleAddMark = async (e: React.FormEvent) => {
+  const handleAddMark = async (e: FormEvent) => {
     e.preventDefault();
     await dataService.addMark({
       studentId: newMark.studentId,
@@ -41,7 +41,7 @@ export default function AdminDashboard({ data }: AdminDashboardProps) {
     setNewMark({ studentId: '', subject: '', score: '' });
   };
   
-  const handleAddSubject = async (e: React.FormEvent) => {
+  const handleAddSubject = async (e: FormEvent) => {
     e.preventDefault();
     if (newSubject) {
       await dataService.addSubject(newSubject);
@@ -49,7 +49,7 @@ export default function AdminDashboard({ data }: AdminDashboardProps) {
     }
   };
 
-  const handleAddGroup = async (e: React.FormEvent) => {
+  const handleAddGroup = async (e: FormEvent) => {
     e.preventDefault();
     if (newGroup) {
       await dataService.addGroup(newGroup);

@@ -26,12 +26,12 @@ export const subscribeToData = (onData: (data: AppData) => void) => {
   const unsubStudents = onSnapshot(collection(db, 'students'), (snapshot) => {
     data.students = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Student));
     onData({ ...data });
-  });
+  }, (error) => console.error("Firestore Students Error:", error));
 
   const unsubMarks = onSnapshot(collection(db, 'marks'), (snapshot) => {
     data.marks = snapshot.docs.map(d => ({ ...d.data(), id: d.id } as Mark));
     onData({ ...data });
-  });
+  }, (error) => console.error("Firestore Marks Error:", error));
 
   const unsubSettings = onSnapshot(doc(db, 'settings', 'global'), (snapshot) => {
     if (snapshot.exists()) {
@@ -46,7 +46,7 @@ export const subscribeToData = (onData: (data: AppData) => void) => {
       });
     }
     onData({ ...data });
-  });
+  }, (error) => console.error("Firestore Settings Error:", error));
 
   return () => {
     unsubStudents();
