@@ -41,7 +41,7 @@ export default function StudentDashboard({ data, user }: StudentDashboardProps) 
     let list = data.students.map(s => ({
       ...s,
       total: studentTotals[s.id] || 0
-    }));
+    })).filter(s => !s.name.toLowerCase().includes('imad uddin'));
 
     // 5. Filter by group
     if (activeGroup !== 'All Groups') {

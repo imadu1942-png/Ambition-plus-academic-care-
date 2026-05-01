@@ -106,7 +106,7 @@ export default function Splash({ onComplete }: { onComplete: () => void }) {
                 />
               </div>
               <div className="flex justify-between items-center text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">
-                <span>Initializing Hub</span>
+                <span>Loading</span>
                 <span>{progress}%</span>
               </div>
             </div>
